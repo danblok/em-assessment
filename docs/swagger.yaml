@@ -1,0 +1,222 @@
+openapi: 3.0.3
+info:
+  title: Cars API
+  version: 1.0.0
+  description: API for managing cars
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /cars:
+    get:
+      description: Returns a list a filtered list of cars
+      parameters:
+        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/PageOffset'
+        - $ref: '#/components/parameters/CarID'
+        - $ref: '#/components/parameters/RegNum'
+        - $ref: '#/components/parameters/Mark'
+        - $ref: '#/components/parameters/Model'
+        - $ref: '#/components/parameters/Year'
+      responses:
+        '200':
+          description: Successfully returned a list of cars
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Car'
+        '400':
+          $ref: '#/components/responses/400Error'
+        '500':
+          $ref: '#/components/responses/500Error'
+          
+    post:
+      description: Adds cars. Fills information about them from an external API.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                regNums:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+      responses:
+        '201':
+          description: Succsessfully added cars
+        '400':
+          $ref: '#/components/responses/400Error'
+        '500':
+          $ref: '#/components/responses/500Error'
+          
+  /cars/{id}:
+    patch:
+      description: Updates information about a car
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - type: object
+                  properties:
+                    regNum: 
+                      type: string
+                - type: object
+                  properties:
+                    mark: 
+                      type: string
+                - type: object
+                  properties:
+                    model: 
+                      type: string
+                - type: object
+                  properties:
+                    year: 
+                      type: integer
+      responses:
+        '200':
+          description: Successfully updated a car
+        '400':
+          $ref: '#/components/responses/400Error'
+        '500':
+          $ref: '#/components/responses/500Error'
+    
+    delete:
+      description: Deletes information about a car
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      responses:
+        '200':
+          description: Successfully deleted a car
+        '400':
+          $ref: '#/components/responses/400Error'
+        '500':
+          $ref: '#/components/responses/500Error'
+    
+components:
+  schemas:
+    Car:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 81e9ec70-cc08-4562-a482-94b3335ec406
+        regNum:
+          type: string
+          example: X123XX456
+        mark:
+          type: string
+          example: Toyota
+        model:
+          type: string
+          example: Camry
+        year:
+          type: integer
+          example: 2018
+          minimum: 0
+  parameters:
+    ID:
+      name: id
+      in: path
+      description: ID of a car
+      schema:
+        type: string
+        format: uuid
+      example: e54534e1-7171-4e78-b5ed-5c9811bf3ac9
+      required: true
+    PageLimit:
+      name: limit
+      in: query
+      description: Limits number of returned cars
+      schema:
+        type: integer
+        default: 20
+        minimum: 0
+    PageOffset:
+      name: offset
+      in: query
+      description: Specifies the number of page of the cars to be returned
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+    CarID:
+      name: id
+      in: query
+      description: Specifies IDs of the cars to be returned
+      schema:
+        type: array
+        items:
+          type: string
+          format: uuid
+      examples: 
+        one:
+          value: ["303244a2-67df-4950-a4a8-f41647102d16"]
+        many:
+          value: ["2862b267-2e3a-46e2-8ae5-0570f96ae317", "f32c041a-160b-4bc3-aa1e-175af0b7ae03"]
+    RegNum:
+      name: regNum
+      in: query
+      description: Specifies reg nums of the cars to be returned
+      schema:
+        type: array
+        items:
+          type: string
+      examples:
+        one: 
+          value: ["X123XX456"]
+        many:
+          value: ["Y456YY789", "X123XX456"]
+    Mark:
+      name: mark
+      in: query
+      description: Specifies marks of the cars to be returned
+      schema:
+        type: array
+        items:
+          type: string
+      examples:
+        one: 
+          value: ["Ford"]
+        many:
+          value: ["Ford", "Tayota"]
+    Model:
+      name: model
+      in: query
+      description: Specifies models of the cars to be returned
+      schema:
+        type: array
+        items:
+          type: string
+      examples:
+        one: 
+          value: ["Camry"]
+        many:
+          value: ["Civic", "Camry"]
+    Year:
+      name: year
+      in: query
+      description: Specifies years of the cars to be returned
+      schema:
+        type: array
+        items:
+          type: integer
+      examples:
+        one: 
+          value: [2018]
+        many:
+          value: [2019, 2020, 2021]
+  responses:
+    400Error:
+      description: Invalid request
+    500Error:
+      description: Internal error
